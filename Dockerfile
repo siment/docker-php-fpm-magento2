@@ -9,49 +9,53 @@ FROM php:7.0-fpm-alpine
 # see http://stackoverflow.com/a/39218681
 
 ##
-# To install Xdebug
-# See https://github.com/prooph/docker-files/blob/master/php/7.0-cli-xdebug
+# This environment variable is used by "docker-php-ext-install"
+# See https://github.com/docker-library/php/blob/ddc7084c8a78ea12f0cfdceff7d03c5a530b787e/7.0/alpine/docker-php-ext-install#L88
 ##
-ENV BUILD_DEPS \
+ENV PHPIZE_DEPS \
   autoconf \
   cmake \
   file \
+  freetype-dev \
   g++ \
   git \
   gcc \
   icu-dev \
   libc-dev \
+  libjpeg-turbo-dev \
   libmcrypt-dev \
   libpng-dev \
   libxslt-dev \
   make \
+  pcre-dev \
   pkgconf \
   re2c
 
-# These libraries are persistent
-ENV RUNTIME_DEPS \
-  icu \
-  libmcrypt \
-  libpng \
-  libxslt \
-  openssh \
-  openssl \
-  tini
-
-ENV PHP_EXTENSIONS \
-  gd \
-  intl \
-  mcrypt \
-  mysqli \
-  pdo_mysql \
-  xsl \
-  zip
-
-RUN set -x \
-  && apk update && apk add $RUNTIME_DEPS $BUILD_DEPS \
-  && docker-php-ext-install $PHP_EXTENSIONS \
-  && rm /var/cache/apk/* \
-  && apk del $BUILD_DEPS
+RUN set -x && \
+  apk update && apk add \
+    freetype \
+    icu \
+    libjpeg-turbo \
+    libmcrypt \
+    libpng \
+    libxslt \
+    openssh \
+    openssl \
+    tini && \
+  docker-php-ext-configure gd \
+    --with-freetype-dir=/usr/include/ \
+    --with-png-dir=/usr/include/ \
+    --with-jpeg-dir=/usr/include/ && \
+  NPROC=$(getconf _NPROCESSORS_ONLN || 1) && \
+  docker-php-ext-install -j${NPROC} \
+    gd \
+    intl \
+    mcrypt \
+    mysqli \
+    pdo_mysql \
+    xsl \
+    zip && \
+  rm /var/cache/apk/*
 
 COPY config/magento.conf /usr/local/etc/php-fpm.d/zzz-magento.conf
 
