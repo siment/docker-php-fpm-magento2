@@ -57,6 +57,15 @@ RUN set -x && \
     zip && \
   rm /var/cache/apk/*
 
+# Install Magerun2
+ENV N98_MAGERUN2_CHECkSUM 'd94f4b938f9c43d4a42f0e0ddcd38a051525f1ab0eb0cd84816ca48bbe5d2c20  n98-magerun2.phar'
+RUN wget https://files.magerun.net/n98-magerun2.phar -O /root/n98-magerun2.phar && \
+  cd /root && \
+  echo "${N98_MAGERUN2_CHECkSUM}" | sha256sum -c - && \
+  chmod +x n98-magerun2.phar && \
+  mv n98-magerun2.phar /usr/local/bin/ && \
+  cd - \
+
 COPY config/magento.conf /usr/local/etc/php-fpm.d/zzz-magento.conf
 
 VOLUME ["/var/www"]
