@@ -64,8 +64,9 @@ RUN wget https://files.magerun.net/n98-magerun2.phar -O /root/n98-magerun2.phar 
   echo "${N98_MAGERUN2_CHECkSUM}" | sha256sum -c - && \
   chmod +x n98-magerun2.phar && \
   mv n98-magerun2.phar /usr/local/bin/ && \
-  cd - \
+  cd -
 
+COPY config/php.ini /usr/local/etc/php/
 COPY config/magento.conf /usr/local/etc/php-fpm.d/zzz-magento.conf
 
 VOLUME ["/var/www"]
